@@ -32,9 +32,18 @@ if (-not (Test-Path $mainJs)) {
     Write-Error "dist-electron/main.js manquant. Lancez d'abord : npm run electron:compile"
 }
 
-# 2. Nettoyer / preparer dist
+# 2. Nettoyer / preparer dist (cmd rmdir gere mieux les chemins longs que Remove-Item)
 if (Test-Path $DIST) {
-    Remove-Item -Recurse -Force $DIST
+    Write-Host "Nettoyage du dossier dist/ (peut prendre 30s)..."
+    cmd /c "rmdir /s /q `"$DIST`"" 2>$null
+    # Si rmdir a echoue (chemins trop longs), retente avec robocopy /MIR depuis un dir vide
+    if (Test-Path $DIST) {
+        $emptyDir = Join-Path $env:TEMP "dt-empty-$([guid]::NewGuid())"
+        New-Item -ItemType Directory -Path $emptyDir | Out-Null
+        robocopy $emptyDir $DIST /MIR /NJH /NJS /NDL /NC /NS /NP | Out-Null
+        Remove-Item -Recurse -Force $emptyDir -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force $DIST -ErrorAction SilentlyContinue
+    }
 }
 New-Item -ItemType Directory -Path $APP_OUT -Force | Out-Null
 Write-Host "[OK] Dossier dist/ prepare" -ForegroundColor Green
@@ -100,9 +109,14 @@ $staticDest = Join-Path $RESOURCES_APP ".next\static"
 New-Item -ItemType Directory -Path (Split-Path $staticDest) -Force -ErrorAction SilentlyContinue | Out-Null
 Copy-Item -Path $staticSrc -Destination $staticDest -Recurse -Force
 
-# public/
+# public/ — on EXCLUT public/uploads/ (données utilisateur, peuvent contenir
+# des fichiers aux noms très longs qui dépassent MAX_PATH Windows)
 $publicSrc = Join-Path $ROOT "public"
-Copy-Item -Path $publicSrc -Destination (Join-Path $RESOURCES_APP "public") -Recurse -Force
+$publicDst = Join-Path $RESOURCES_APP "public"
+robocopy $publicSrc $publicDst /E /XD "uploads" /NJH /NJS /NDL /NC /NS /NP | Out-Null
+
+# Créer un dossier uploads/ vide pour que l'app puisse y écrire
+New-Item -ItemType Directory -Path (Join-Path $publicDst "uploads") -Force -ErrorAction SilentlyContinue | Out-Null
 
 # .env
 $envSrc = Join-Path $ROOT ".env"
