@@ -1,0 +1,17 @@
+# Fichiers spécifiques à la version desktop — pas besoin sur Vercel
+electron/
+dist/
+dist-electron/
+build/icon.ico
+build/icon.png
+build/license.txt
+scripts/manual-package.ps1
+scripts/package-app.js
+electron-builder.yml
+tsconfig.electron.json
+
+# Fichiers de log locaux
+*.log
+package-log.txt
+server-test.log
+electron-launch.log
