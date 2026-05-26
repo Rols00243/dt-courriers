@@ -45,4 +45,37 @@ export const SENS_LABELS: Record<string, string> = {
   INTERNE: "Interne",
 }
 
+// Niveaux d'accès / confidentialité (ordre hiérarchique)
+export const NIVEAU_ACCES_LABELS: Record<string, string> = {
+  PUBLIC: "Public",
+  INTERNE: "Interne",
+  CONFIDENTIEL: "Confidentiel",
+  SECRET: "Secret",
+}
+
+export const NIVEAU_ACCES_COLORS: Record<string, string> = {
+  PUBLIC: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  INTERNE: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  CONFIDENTIEL: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  SECRET: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+}
+
+// Hiérarchie : un utilisateur de niveau X voit les courriers de niveau ≤ X
+export const NIVEAU_ACCES_ORDER: Record<string, number> = {
+  PUBLIC: 1,
+  INTERNE: 2,
+  CONFIDENTIEL: 3,
+  SECRET: 4,
+}
+
+export function canAccessDocument(userLevel: string, docLevel: string): boolean {
+  return (NIVEAU_ACCES_ORDER[userLevel] ?? 0) >= (NIVEAU_ACCES_ORDER[docLevel] ?? 99)
+}
+
+export const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Administrateur",
+  GESTIONNAIRE: "Gestionnaire",
+  AGENT: "Agent",
+}
+
 export const PAGE_SIZE = 15

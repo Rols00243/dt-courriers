@@ -12,6 +12,11 @@ model User {
   email         String         @unique
   password      String
   role          Role           @default(AGENT)
+  niveauAcces   NiveauAcces    @default(INTERNE)
+  // Permission déléguée : autorise un gestionnaire à gérer les utilisateurs
+  // (création, suppression, reset mot de passe, niveau d'accès des autres).
+  peutGererUtilisateurs Boolean @default(false)
+  actif         Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   courriers     Courrier[]
@@ -36,6 +41,7 @@ model Courrier {
   description   String?
   verrouille    Boolean       @default(false)
   qrCode        String?
+  niveauAcces   NiveauAcces   @default(INTERNE)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   createdBy     User          @relation(fields: [createdById], references: [id])
@@ -151,4 +157,14 @@ enum Priorite {
   NORMALE
   URGENTE
   TRES_URGENTE
+}
+
+// Niveau de confidentialité des documents et clearance des utilisateurs.
+// Un utilisateur ne voit que les courriers dont le niveau ≤ son propre niveau.
+// PUBLIC < INTERNE < CONFIDENTIEL < SECRET (ADMIN voit tout).
+enum NiveauAcces {
+  PUBLIC
+  INTERNE
+  CONFIDENTIEL
+  SECRET
 }

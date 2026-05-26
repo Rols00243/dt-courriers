@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { genererNumero } from "@/lib/numero"
 import { logAction, notifyAdmins } from "@/lib/audit"
-import { PAGE_SIZE } from "@/lib/constants"
+import { PAGE_SIZE, NIVEAU_ACCES_ORDER } from "@/lib/constants"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
