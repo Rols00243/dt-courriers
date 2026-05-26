@@ -1,0 +1,78 @@
+appId: com.dtcourriers.app
+productName: DT Courriers
+copyright: Copyright © 2026 DT Courriers
+asar: true
+
+# Utilise le système moderne (ZIP) au lieu du legacy .7z qui contient
+# des symlinks macOS provoquant des erreurs de privilèges sur Windows
+toolsets:
+  winCodeSign: "1.1.0"
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - dist-electron/**/*
+  - package.json
+  - node_modules/tree-kill/**/*
+
+# Le serveur Next.js standalone + ses assets statiques + .env
+# sont copiés dans resources/app/ pour être lancés au démarrage
+extraResources:
+  - from: .next/standalone
+    to: app
+    filter:
+      - "**/*"
+      - "!.env*"
+  - from: .next/static
+    to: app/.next/static
+    filter:
+      - "**/*"
+  - from: public
+    to: app/public
+    filter:
+      - "**/*"
+  - from: .env
+    to: app/.env
+  - from: build/icon.png
+    to: icon.png
+
+# Windows : NSIS (Setup.exe avec wizard) + portable (.exe autonome)
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: build/icon.ico
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+# Désactive la signature de code (pas de certificat fourni)
+# Évite le téléchargement de winCodeSign et ses problèmes de symlinks
+  signtoolOptions: null
+  forceCodeSigning: false
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: DT Courriers
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  license: build/license.txt
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}
+
+# Réservé pour auto-update futur (GitHub Releases ou serveur custom)
+# publish:
+#   provider: github
+#   owner: votre-username
+#   repo: dt-courriers

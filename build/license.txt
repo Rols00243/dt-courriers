@@ -1,0 +1,11 @@
+DT Courriers — Conditions d'utilisation
+
+Cette application est un système de gestion documentaire interne pour le suivi
+et l'archivage des courriers administratifs.
+
+En installant ce logiciel, vous acceptez :
+1. De l'utiliser uniquement dans le cadre prévu par votre organisation
+2. De respecter la confidentialité des documents traités
+3. De maintenir vos identifiants d'accès sécurisés
+
+Copyright © 2026 DT Courriers. Tous droits réservés.

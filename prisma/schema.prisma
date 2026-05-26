@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  password      String
+  role          Role           @default(AGENT)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  courriers     Courrier[]
+  comments      Comment[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  loginLogs     LoginLog[]
+}
+
+model Courrier {
+  id            String        @id @default(cuid())
+  numero        String        @unique
+  objet         String
+  type          TypeCourrier
+  sens          SensCourrier
+  statut        Statut        @default(EN_ATTENTE)
+  priorite      Priorite      @default(NORMALE)
+  expediteur    String
+  destinataire  String
+  dateDocument  DateTime
+  dateReception DateTime?
+  description   String?
+  verrouille    Boolean       @default(false)
+  qrCode        String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     User          @relation(fields: [createdById], references: [id])
+  createdById   String
+  fichiers      Fichier[]
+  comments      Comment[]
+  auditLogs     AuditLog[]
+
+  @@index([statut])
+  @@index([type])
+  @@index([createdById])
+  @@index([dateDocument])
+}
+
+model Fichier {
+  id          String   @id @default(cuid())
+  nom         String
+  url         String
+  taille      Int
+  type        String
+  ocrTexte    String?
+  createdAt   DateTime @default(now())
+  courrier    Courrier @relation(fields: [courrierId], references: [id], onDelete: Cascade)
+  courrierId  String
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  contenu     String
+  createdAt   DateTime @default(now())
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    String
+  courrier    Courrier @relation(fields: [courrierId], references: [id], onDelete: Cascade)
+  courrierId  String
+
+  @@index([courrierId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  details     String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  courrier    Courrier? @relation(fields: [courrierId], references: [id], onDelete: Cascade)
+  courrierId  String?
+
+  @@index([courrierId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String
+  titre       String
+  message     String
+  lien        String?
+  lu          Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@index([userId, lu])
+  @@index([createdAt])
+}
+
+model LoginLog {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum Role {
+  ADMIN
+  GESTIONNAIRE
+  AGENT
+}
+
+enum TypeCourrier {
+  COURRIER_ENTRANT
+  COURRIER_SORTANT
+  COURRIER_INTERNE
+  PV_COMMISSION
+  ORDRE_MISSION
+  RAPPORT_SEMESTRIEL
+  RAPPORT_ANNUEL
+  DOCUMENT_OFFICIEL
+}
+
+enum SensCourrier {
+  ENTRANT
+  SORTANT
+  INTERNE
+}
+
+enum Statut {
+  EN_ATTENTE
+  EN_COURS
+  TRAITE
+  ARCHIVE
+  URGENT
+}
+
+enum Priorite {
+  BASSE
+  NORMALE
+  URGENTE
+  TRES_URGENTE
+}
