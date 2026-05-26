@@ -20,6 +20,7 @@ const emptyForm = {
   sens: "",
   statut: "ARCHIVE",
   priorite: "NORMALE",
+  niveauAcces: "INTERNE",
   expediteur: "",
   destinataire: "",
   dateDocument: "",
@@ -68,6 +69,7 @@ export default function NouvelleArchivePage() {
       type: result.type ?? prev.type,
       sens: result.sens ?? prev.sens,
       priorite: result.priorite ?? prev.priorite,
+      niveauAcces: (result as { niveauAcces?: string }).niveauAcces ?? prev.niveauAcces,
       expediteur: result.expediteur ?? prev.expediteur,
       destinataire: result.destinataire ?? prev.destinataire,
       dateDocument: result.dateDocument ?? prev.dateDocument,
@@ -269,6 +271,19 @@ export default function NouvelleArchivePage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <Label>Niveau d&apos;accès (confidentialité)</Label>
+              <Select value={form.niveauAcces} onValueChange={(v) => handleChange("niveauAcces", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PUBLIC">🟢 Public</SelectItem>
+                  <SelectItem value="INTERNE">🔵 Interne</SelectItem>
+                  <SelectItem value="CONFIDENTIEL">🟠 Confidentiel</SelectItem>
+                  <SelectItem value="SECRET">🔴 Secret</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

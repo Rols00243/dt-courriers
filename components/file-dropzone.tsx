@@ -20,6 +20,7 @@ export interface AnalysisResult {
   type: string
   sens: string
   priorite: string
+  niveauAcces: string
   expediteur: string
   destinataire: string
   dateDocument: string

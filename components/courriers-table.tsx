@@ -15,6 +15,7 @@ import { fr } from "date-fns/locale"
 import {
   STATUT_LABELS, STATUT_COLORS, TYPE_LABELS,
   PRIORITE_COLORS, PRIORITE_LABELS,
+  NIVEAU_ACCES_LABELS, NIVEAU_ACCES_COLORS,
 } from "@/lib/constants"
 
 interface Courrier {
@@ -24,6 +25,7 @@ interface Courrier {
   type: string
   statut: string
   priorite: string
+  niveauAcces: string
   expediteur: string
   dateDocument: string
   verrouille: boolean
@@ -44,6 +46,7 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
   const [type, setType] = useState(params.get("type") ?? "")
   const [statut, setStatut] = useState(params.get("statut") ?? "")
   const [priorite, setPriorite] = useState(params.get("priorite") ?? "")
+  const [niveauAcces, setNiveauAcces] = useState(params.get("niveauAcces") ?? "")
   const [collaborateur, setCollaborateur] = useState(params.get("collaborateur") ?? "")
   const [dateDebut, setDateDebut] = useState(params.get("dateDebut") ?? "")
   const [dateFin, setDateFin] = useState(params.get("dateFin") ?? "")
@@ -63,6 +66,7 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
     if (type) sp.set("type", type)
     if (statut) sp.set("statut", statut)
     if (priorite) sp.set("priorite", priorite)
+    if (niveauAcces) sp.set("niveauAcces", niveauAcces)
     if (collaborateur) sp.set("collaborateur", collaborateur)
     if (dateDebut) sp.set("dateDebut", dateDebut)
     if (dateFin) sp.set("dateFin", dateFin)
@@ -85,14 +89,14 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
       urlSp.delete("sens")
       router.replace(`${pathname}?${urlSp.toString()}`, { scroll: false })
     })
-  }, [debouncedQ, type, statut, priorite, collaborateur, dateDebut, dateFin, page, sensFilter, pathname, router])
+  }, [debouncedQ, type, statut, priorite, niveauAcces, collaborateur, dateDebut, dateFin, page, sensFilter, pathname, router])
 
   function resetFilters() {
-    setQ(""); setType(""); setStatut(""); setPriorite("")
+    setQ(""); setType(""); setStatut(""); setPriorite(""); setNiveauAcces("")
     setCollaborateur(""); setDateDebut(""); setDateFin(""); setPage(1)
   }
 
-  const hasActiveFilters = type || statut || priorite || collaborateur || dateDebut || dateFin
+  const hasActiveFilters = type || statut || priorite || niveauAcces || collaborateur || dateDebut || dateFin
 
   return (
     <Card className="border-0 shadow-sm">
@@ -176,6 +180,14 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
               <option value="">Tous collaborateurs</option>
               {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
             </select>
+            <select
+              value={niveauAcces}
+              onChange={(e) => { setNiveauAcces(e.target.value); setPage(1) }}
+              className="px-2 py-1.5 border rounded text-sm bg-white dark:bg-gray-900 dark:border-gray-700"
+            >
+              <option value="">Tous niveaux d&apos;accès</option>
+              {Object.entries(NIVEAU_ACCES_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
             <div className="col-span-2 md:col-span-2 flex gap-2">
               <div className="flex-1">
                 <label className="text-[10px] text-gray-500 uppercase">Date début</label>
@@ -209,6 +221,7 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
                 <TableHead className="font-semibold">Expéditeur</TableHead>
                 <TableHead className="font-semibold">Statut</TableHead>
                 <TableHead className="font-semibold">Priorité</TableHead>
+                <TableHead className="font-semibold">Accès</TableHead>
                 <TableHead className="font-semibold">Date</TableHead>
                 <TableHead className="font-semibold text-center">Pièces</TableHead>
                 <TableHead className="font-semibold text-center">Comm.</TableHead>
@@ -218,13 +231,13 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
             <TableBody>
               {loading && courriers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-12">
+                  <TableCell colSpan={11} className="text-center py-12">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
                   </TableCell>
                 </TableRow>
               ) : courriers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-12 text-gray-400">
+                  <TableCell colSpan={11} className="text-center py-12 text-gray-400">
                     Aucun courrier trouvé
                   </TableCell>
                 </TableRow>
@@ -247,6 +260,11 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
                   <TableCell>
                     <Badge className={`text-xs ${PRIORITE_COLORS[c.priorite]}`} variant="outline">
                       {PRIORITE_LABELS[c.priorite]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`text-xs ${NIVEAU_ACCES_COLORS[c.niveauAcces]}`} variant="outline">
+                      {NIVEAU_ACCES_LABELS[c.niveauAcces]}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-gray-500">

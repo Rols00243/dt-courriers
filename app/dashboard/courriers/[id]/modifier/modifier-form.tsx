@@ -16,6 +16,7 @@ interface CourrierData {
   objet: string
   statut: string
   priorite: string
+  niveauAcces: string
   description: string | null
 }
 
@@ -26,6 +27,7 @@ export function ModifierForm({ courrier }: { courrier: CourrierData }) {
     objet: courrier.objet,
     statut: courrier.statut,
     priorite: courrier.priorite,
+    niveauAcces: courrier.niveauAcces,
     description: courrier.description ?? "",
   })
 
@@ -94,6 +96,18 @@ export function ModifierForm({ courrier }: { courrier: CourrierData }) {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div>
+              <Label>Niveau d&apos;accès (confidentialité)</Label>
+              <Select value={form.niveauAcces} onValueChange={(v) => setForm({ ...form, niveauAcces: v ?? "INTERNE" })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PUBLIC">🟢 Public</SelectItem>
+                  <SelectItem value="INTERNE">🔵 Interne</SelectItem>
+                  <SelectItem value="CONFIDENTIEL">🟠 Confidentiel</SelectItem>
+                  <SelectItem value="SECRET">🔴 Secret</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Description</Label>

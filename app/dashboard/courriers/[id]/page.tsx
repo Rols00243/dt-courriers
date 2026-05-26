@@ -16,6 +16,7 @@ import { fr } from "date-fns/locale"
 import {
   STATUT_LABELS, STATUT_COLORS, TYPE_LABELS,
   PRIORITE_LABELS, PRIORITE_COLORS, SENS_LABELS,
+  NIVEAU_ACCES_LABELS, NIVEAU_ACCES_COLORS,
 } from "@/lib/constants"
 import { StatutSelector } from "./statut-selector"
 import { CommentsSection } from "@/components/comments-section"
@@ -96,6 +97,9 @@ export default async function CourrierDetailPage({
                 </Badge>
                 <Badge variant="outline" className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
                   {SENS_LABELS[courrier.sens]}
+                </Badge>
+                <Badge className={NIVEAU_ACCES_COLORS[courrier.niveauAcces]} variant="outline">
+                  {NIVEAU_ACCES_LABELS[courrier.niveauAcces]}
                 </Badge>
               </div>
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { logAction } from "@/lib/audit"
-import { STATUT_LABELS, PRIORITE_LABELS } from "@/lib/constants"
+import { STATUT_LABELS, PRIORITE_LABELS, NIVEAU_ACCES_LABELS } from "@/lib/constants"
 
 export async function GET(
   req: NextRequest,
@@ -60,6 +60,12 @@ export async function PATCH(
   if (body.verrouille !== undefined && body.verrouille !== existing.verrouille) {
     updates.verrouille = body.verrouille
     changes.push(body.verrouille ? "Document verrouillé" : "Document déverrouillé")
+  }
+  if (body.niveauAcces !== undefined && body.niveauAcces !== existing.niveauAcces) {
+    updates.niveauAcces = body.niveauAcces
+    changes.push(
+      `Niveau d'accès: ${NIVEAU_ACCES_LABELS[existing.niveauAcces]} → ${NIVEAU_ACCES_LABELS[body.niveauAcces]}`
+    )
   }
 
   if (Object.keys(updates).length === 0) {

@@ -20,6 +20,7 @@ const emptyForm = {
   sens: "",
   statut: "EN_ATTENTE",
   priorite: "NORMALE",
+  niveauAcces: "INTERNE",
   expediteur: "",
   destinataire: "",
   dateDocument: "",
@@ -71,6 +72,7 @@ export default function NouveauCourrierPage() {
       type: result.type ?? prev.type,
       sens: result.sens ?? prev.sens,
       priorite: result.priorite ?? prev.priorite,
+      niveauAcces: (result as { niveauAcces?: string }).niveauAcces ?? prev.niveauAcces,
       expediteur: result.expediteur ?? prev.expediteur,
       destinataire: result.destinataire ?? prev.destinataire,
       dateDocument: result.dateDocument ?? prev.dateDocument,
@@ -223,6 +225,22 @@ export default function NouveauCourrierPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <Label>Niveau d&apos;accès (confidentialité)</Label>
+              <Select value={form.niveauAcces} onValueChange={(v) => handleChange("niveauAcces", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PUBLIC">🟢 Public — accessible à tous</SelectItem>
+                  <SelectItem value="INTERNE">🔵 Interne — personnel de l&apos;organisation</SelectItem>
+                  <SelectItem value="CONFIDENTIEL">🟠 Confidentiel — accès restreint</SelectItem>
+                  <SelectItem value="SECRET">🔴 Secret — admin uniquement</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                Seuls les utilisateurs avec un niveau ≥ verront ce courrier dans leur liste.
+              </p>
             </div>
           </CardContent>
         </Card>

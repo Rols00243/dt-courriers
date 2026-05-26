@@ -18,6 +18,7 @@ export default async function ModifierPage({
         objet: courrier.objet,
         statut: courrier.statut,
         priorite: courrier.priorite,
+        niveauAcces: courrier.niveauAcces,
         description: courrier.description,
       }}
     />

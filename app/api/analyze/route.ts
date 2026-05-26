@@ -37,6 +37,12 @@ const ANALYSIS_SCHEMA = {
       description:
         "Priorité détectée. URGENTE si 'urgent' ou délai serré. TRES_URGENTE si 'très urgent'. NORMALE par défaut.",
     },
+    niveauAcces: {
+      type: "string",
+      enum: ["PUBLIC", "INTERNE", "CONFIDENTIEL", "SECRET"],
+      description:
+        "Niveau de confidentialité détecté dans l'en-tête ou les mentions. PUBLIC = pour diffusion. INTERNE = personnel de l'organisation (défaut). CONFIDENTIEL si mention 'Confidentiel' ou 'À usage restreint'. SECRET si 'Secret' ou 'Top secret'.",
+    },
     expediteur: {
       type: "string",
       description: "Nom de la personne, du service ou de l'organisation qui envoie le courrier",
@@ -63,6 +69,7 @@ const ANALYSIS_SCHEMA = {
     "type",
     "sens",
     "priorite",
+    "niveauAcces",
     "expediteur",
     "destinataire",
     "dateDocument",

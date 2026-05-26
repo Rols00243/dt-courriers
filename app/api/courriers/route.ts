@@ -9,20 +9,44 @@ export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
 
+  // Récupère le niveau d'accès de l'utilisateur
+  const me = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { niveauAcces: true, role: true },
+  })
+
   const { searchParams } = new URL(req.url)
   const q = searchParams.get("q") ?? ""
   const type = searchParams.get("type") ?? ""
   const statut = searchParams.get("statut") ?? ""
   const sens = searchParams.get("sens") ?? ""
   const priorite = searchParams.get("priorite") ?? ""
+  const niveauAcces = searchParams.get("niveauAcces") ?? ""
   const collaborateur = searchParams.get("collaborateur") ?? ""
   const dateDebut = searchParams.get("dateDebut") ?? ""
   const dateFin = searchParams.get("dateFin") ?? ""
   const page = parseInt(searchParams.get("page") ?? "1", 10)
   const pageSize = parseInt(searchParams.get("pageSize") ?? String(PAGE_SIZE), 10)
 
+  // Filtre de confidentialité : ADMIN voit tout, sinon limité au niveau de l'utilisateur
+  // ou aux courriers qu'il a lui-même créés.
+  let accessFilter: Record<string, unknown> = {}
+  if (me && me.role !== "ADMIN") {
+    const userLevel = NIVEAU_ACCES_ORDER[me.niveauAcces] ?? 0
+    const allowedLevels = Object.entries(NIVEAU_ACCES_ORDER)
+      .filter(([, level]) => level <= userLevel)
+      .map(([key]) => key)
+    accessFilter = {
+      OR: [
+        { niveauAcces: { in: allowedLevels as never } },
+        { createdById: session.user.id },
+      ],
+    }
+  }
+
   const where = {
     AND: [
+      accessFilter,
       q ? {
         OR: [
           { objet: { contains: q, mode: "insensitive" as const } },
@@ -36,6 +60,7 @@ export async function GET(req: NextRequest) {
       statut ? { statut: statut as never } : {},
       sens ? { sens: sens as never } : {},
       priorite ? { priorite: priorite as never } : {},
+      niveauAcces ? { niveauAcces: niveauAcces as never } : {},
       collaborateur ? { createdById: collaborateur } : {},
       dateDebut ? { dateDocument: { gte: new Date(dateDebut) } } : {},
       dateFin ? { dateDocument: { lte: new Date(dateFin + "T23:59:59") } } : {},
@@ -71,10 +96,31 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
 
   const body = await req.json()
-  const { objet, type, sens, statut, priorite, expediteur, destinataire, dateDocument, dateReception, description } = body
+  const {
+    objet, type, sens, statut, priorite, niveauAcces,
+    expediteur, destinataire, dateDocument, dateReception, description,
+  } = body
 
   if (!objet || !type || !sens || !expediteur || !destinataire || !dateDocument) {
     return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 })
+  }
+
+  // Un utilisateur ne peut pas créer un courrier de niveau supérieur au sien
+  if (niveauAcces) {
+    const me = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { niveauAcces: true, role: true },
+    })
+    if (me && me.role !== "ADMIN") {
+      const myLevel = NIVEAU_ACCES_ORDER[me.niveauAcces] ?? 0
+      const reqLevel = NIVEAU_ACCES_ORDER[niveauAcces] ?? 0
+      if (reqLevel > myLevel) {
+        return NextResponse.json(
+          { error: `Vous ne pouvez pas créer un courrier de niveau ${niveauAcces} (votre niveau max: ${me.niveauAcces})` },
+          { status: 403 }
+        )
+      }
+    }
   }
 
   const numero = await genererNumero(type)
@@ -87,6 +133,7 @@ export async function POST(req: NextRequest) {
       sens,
       statut: statut ?? "EN_ATTENTE",
       priorite: priorite ?? "NORMALE",
+      niveauAcces: niveauAcces ?? "INTERNE",
       expediteur,
       destinataire,
       dateDocument: new Date(dateDocument),
