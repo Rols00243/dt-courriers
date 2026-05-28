@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { usePoll } from "@/lib/use-poll"
 
 interface NavItem {
   href: string
@@ -43,17 +44,12 @@ export function Sidebar() {
   const { data: session } = useSession()
   const [badges, setBadges] = useState({ enAttente: 0, notifications: 0 })
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/badges", { cache: "no-store" })
-        if (res.ok) setBadges(await res.json())
-      } catch {}
-    }
-    load()
-    const interval = setInterval(load, 30000)
-    return () => clearInterval(interval)
-  }, [pathname])
+  usePoll(async () => {
+    try {
+      const res = await fetch("/api/badges", { cache: "no-store" })
+      if (res.ok) setBadges(await res.json())
+    } catch {}
+  }, 60000)
 
   return (
     <aside className="flex flex-col w-64 bg-gray-900 dark:bg-gray-950 border-r border-gray-800 text-white min-h-screen">

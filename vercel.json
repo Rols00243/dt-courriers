@@ -20,5 +20,11 @@
     "app/api/export/[id]/route.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/warmup",
+      "schedule": "0 6 * * 1-5"
+    }
+  ]
 }

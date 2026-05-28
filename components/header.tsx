@@ -5,26 +5,22 @@ import { InstallButton } from "@/components/install-button"
 import { Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { usePoll } from "@/lib/use-poll"
 import { Badge } from "@/components/ui/badge"
 
 export function Header() {
   const [count, setCount] = useState(0)
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/badges", { cache: "no-store" })
-        if (res.ok) {
-          const data = await res.json()
-          setCount(data.notifications ?? 0)
-        }
-      } catch {}
-    }
-    load()
-    const interval = setInterval(load, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  usePoll(async () => {
+    try {
+      const res = await fetch("/api/badges", { cache: "no-store" })
+      if (res.ok) {
+        const data = await res.json()
+        setCount(data.notifications ?? 0)
+      }
+    } catch {}
+  }, 60000)
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-end gap-2 px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
