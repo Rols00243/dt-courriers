@@ -2,12 +2,20 @@
 
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
-import imageCompression from "browser-image-compression"
 import {
   Upload, FileText, X, Image as ImageIcon, FileScan, Loader2, Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+
+/**
+ * Lazy-load de `browser-image-compression` : ~400 KB de JS qu'on ne charge
+ * qu'au moment où l'utilisateur dépose effectivement une image.
+ */
+async function getImageCompressor() {
+  const mod = await import("browser-image-compression")
+  return mod.default
+}
 
 export interface DroppedFile {
   file: File
@@ -57,6 +65,7 @@ export function FileDropzone({
         if (enableCompression && f.type.startsWith("image/")) {
           setProcessing(`Compression de ${f.name}...`)
           try {
+            const imageCompression = await getImageCompressor()
             finalFile = await imageCompression(f, {
               maxSizeMB: 2,
               maxWidthOrHeight: 2048,

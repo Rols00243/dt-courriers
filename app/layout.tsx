@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Geist } from "next/font/google"
 import "./globals.css"
-import { SessionProvider } from "next-auth/react"
+import { AppSessionProvider } from "@/components/session-provider-wrapper"
 import { ThemeProvider } from "@/components/theme-provider"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
@@ -39,7 +39,7 @@ export default function RootLayout({
     <html lang="fr" className={`${geist.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SessionProvider>{children}</SessionProvider>
+          <AppSessionProvider>{children}</AppSessionProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -54,6 +54,10 @@ model Courrier {
   @@index([type])
   @@index([createdById])
   @@index([dateDocument])
+  @@index([niveauAcces])
+  @@index([createdAt(sort: Desc)])
+  // Index composite : filtres combinés type+statut sont fréquents
+  @@index([type, statut])
 }
 
 model Fichier {
