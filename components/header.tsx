@@ -2,15 +2,17 @@
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { InstallButton } from "@/components/install-button"
-import { Bell } from "lucide-react"
+import { Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
 import { usePoll } from "@/lib/use-poll"
 import { Badge } from "@/components/ui/badge"
+import { useSidebar } from "@/components/sidebar-context"
 
 export function Header() {
   const [count, setCount] = useState(0)
+  const { toggle } = useSidebar()
 
   usePoll(async () => {
     try {
@@ -23,7 +25,20 @@ export function Header() {
   }, 60000)
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-end gap-2 px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-20 flex items-center gap-2 px-4 md:px-6 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      {/* Bouton hamburger — visible uniquement sur mobile (<md) */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={toggle}
+        className="md:hidden w-9 h-9 p-0"
+        aria-label="Menu"
+      >
+        <Menu className="h-5 w-5" />
+      </Button>
+
+      <div className="flex-1" />
+
       <InstallButton />
       <Link href="/dashboard/notifications">
         <Button variant="ghost" size="sm" className="w-9 h-9 p-0 relative">

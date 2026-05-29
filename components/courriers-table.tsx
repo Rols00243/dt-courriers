@@ -147,7 +147,7 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
         </div>
 
         {showFilters && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
             <select
               value={type}
               onChange={(e) => { setType(e.target.value); setPage(1) }}
