@@ -6,7 +6,7 @@ import { signOut, useSession } from "next-auth/react"
 import {
   FileText, LayoutDashboard, PlusCircle, Archive,
   Users, LogOut, Mail, ChevronRight, History, Settings,
-  Inbox, Send, Bell
+  Inbox, Send, Bell, UserCog, Activity, BarChart3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -31,11 +31,13 @@ const navItems: NavItem[] = [
   { href: "/dashboard/courriers/nouveau", icon: PlusCircle, label: "Nouveau courrier" },
   { href: "/dashboard/archives", icon: Archive, label: "Archives" },
   { href: "/dashboard/notifications", icon: Bell, label: "Notifications", badgeKey: "notifications" },
+  { href: "/dashboard/statistiques", icon: BarChart3, label: "Statistiques" },
   { href: "/dashboard/historique", icon: History, label: "Historique" },
 ]
 
 const adminItems: NavItem[] = [
   { href: "/dashboard/utilisateurs", icon: Users, label: "Utilisateurs" },
+  { href: "/dashboard/connexions", icon: Activity, label: "Connexions" },
   { href: "/dashboard/parametres", icon: Settings, label: "Paramètres" },
 ]
 
@@ -129,6 +131,16 @@ export function Sidebar() {
             <p className="text-xs text-gray-400 truncate">{session?.user.role}</p>
           </div>
         </div>
+        <Link href="/dashboard/profil">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-gray-300 hover:text-white hover:bg-gray-800 justify-start gap-2 mb-1"
+          >
+            <UserCog className="h-4 w-4" />
+            Mon profil
+          </Button>
+        </Link>
         <Button
           variant="ghost"
           size="sm"

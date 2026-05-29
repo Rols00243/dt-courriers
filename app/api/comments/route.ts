@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { logAction, createNotification } from "@/lib/audit"
+import { emailCommentaire } from "@/lib/email"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -57,6 +58,29 @@ export async function POST(req: NextRequest) {
       message: `${session.user.name} a commenté ${courrier.numero}`,
       lien: `/dashboard/courriers/${courrierId}`,
     })
+
+    // Email best-effort : ne bloque jamais la réponse API
+    try {
+      const destinataire = await prisma.user.findUnique({
+        where: { id: courrier.createdById },
+        select: { email: true, name: true },
+      })
+      if (destinataire) {
+        const baseUrl =
+          process.env.NEXTAUTH_URL ?? `http://${req.headers.get("host") ?? "localhost:3000"}`
+        await emailCommentaire({
+          to: destinataire.email,
+          destinataireName: destinataire.name ?? "",
+          auteurName: session.user.name ?? session.user.email ?? "Un collaborateur",
+          courrierNumero: courrier.numero,
+          courrierObjet: courrier.objet,
+          contenu: contenu,
+          courrierUrl: `${baseUrl}/dashboard/courriers/${courrierId}`,
+        })
+      }
+    } catch (e) {
+      console.error("Email comment error:", e)
+    }
   }
 
   return NextResponse.json(comment, { status: 201 })

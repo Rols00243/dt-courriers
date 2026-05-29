@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { headers } from "next/headers"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
@@ -23,6 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         })
 
         if (!user) return null
+        if (user.actif === false) return null
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
@@ -30,6 +32,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         )
 
         if (!isValid) return null
+
+        // Trace la connexion (best-effort, ne bloque pas le login si ça échoue)
+        try {
+          const h = await headers()
+          const ipAddress =
+            h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+            h.get("x-real-ip") ??
+            null
+          const userAgent = h.get("user-agent") ?? null
+          await prisma.loginLog.create({
+            data: {
+              userId: user.id,
+              ipAddress,
+              userAgent,
+            },
+          })
+        } catch (e) {
+          console.error("LoginLog error:", e)
+        }
 
         return {
           id: user.id,
