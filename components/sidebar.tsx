@@ -6,7 +6,7 @@ import { signOut, useSession } from "next-auth/react"
 import {
   FileText, LayoutDashboard, PlusCircle, Archive,
   Users, LogOut, Mail, ChevronRight, History, Settings,
-  Inbox, Send, Bell, UserCog, Activity, BarChart3, X,
+  Inbox, Send, Bell, UserCog, Activity, BarChart3, X, FileSpreadsheet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/archives", icon: Archive, label: "Archives" },
   { href: "/dashboard/notifications", icon: Bell, label: "Notifications", badgeKey: "notifications" },
   { href: "/dashboard/statistiques", icon: BarChart3, label: "Statistiques" },
+  { href: "/dashboard/rapports", icon: FileSpreadsheet, label: "Rapports" },
   { href: "/dashboard/historique", icon: History, label: "Historique" },
 ]
 
