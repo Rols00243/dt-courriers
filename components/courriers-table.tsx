@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Eye, ChevronLeft, ChevronRight, Lock, MessageSquare, Loader2, X, Filter } from "lucide-react"
+import { Search, Eye, ChevronLeft, ChevronRight, Lock, MessageSquare, Loader2, X, Filter, LayoutGrid, List } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -17,6 +17,15 @@ import {
   PRIORITE_COLORS, PRIORITE_LABELS,
   NIVEAU_ACCES_LABELS, NIVEAU_ACCES_COLORS,
 } from "@/lib/constants"
+import { CourrierCard } from "@/components/courrier-card"
+import { cn } from "@/lib/utils"
+
+interface Fichier {
+  id: string
+  nom: string
+  url: string
+  type: string
+}
 
 interface Courrier {
   id: string
@@ -29,7 +38,7 @@ interface Courrier {
   expediteur: string
   dateDocument: string
   verrouille: boolean
-  fichiers: { id: string }[]
+  fichiers: Fichier[]
   createdBy: { name: string | null }
   _count: { comments: number }
 }
@@ -52,6 +61,20 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
   const [dateFin, setDateFin] = useState(params.get("dateFin") ?? "")
   const [page, setPage] = useState(parseInt(params.get("page") ?? "1", 10))
   const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table")
+
+  // Restaure la préférence de vue depuis localStorage
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("dt-view-mode") : null
+    if (saved === "grid" || saved === "table") setViewMode(saved)
+  }, [])
+
+  function changeViewMode(mode: "table" | "grid") {
+    setViewMode(mode)
+    try {
+      localStorage.setItem("dt-view-mode", mode)
+    } catch {}
+  }
 
   const [debouncedQ] = useDebounce(q, 300)
 
@@ -144,6 +167,36 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
               <>{total} résultat{total > 1 ? "s" : ""}</>
             )}
           </span>
+
+          {/* Bascule Tableau / Aperçu */}
+          <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-md p-0.5 border border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => changeViewMode("table")}
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors",
+                viewMode === "table"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+              title="Vue tableau"
+            >
+              <List className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Tableau</span>
+            </button>
+            <button
+              onClick={() => changeViewMode("grid")}
+              className={cn(
+                "flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-colors",
+                viewMode === "grid"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              )}
+              title="Vue aperçu"
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Aperçu</span>
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -211,6 +264,24 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
           </div>
         )}
 
+        {viewMode === "grid" ? (
+          // ───────── Vue Aperçu (grille de cartes avec miniatures) ─────────
+          <div>
+            {loading && courriers.length === 0 ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              </div>
+            ) : courriers.length === 0 ? (
+              <div className="text-center py-20 text-gray-400">Aucun courrier trouvé</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {courriers.map((c) => (
+                  <CourrierCard key={c.id} courrier={c} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -291,6 +362,7 @@ export function CourriersTable({ users, sensFilter }: { users: User[]; sensFilte
             </TableBody>
           </Table>
         </div>
+        )}
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
