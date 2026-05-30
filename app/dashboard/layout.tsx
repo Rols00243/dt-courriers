@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { SidebarProvider } from "@/components/sidebar-context"
+import { CommandPalette } from "@/components/command-palette"
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +12,8 @@ export default async function DashboardLayout({
 }) {
   const session = await auth()
   if (!session) redirect("/login")
+
+  const isAdmin = session.user.role === "ADMIN"
 
   return (
     <SidebarProvider>
@@ -23,6 +26,7 @@ export default async function DashboardLayout({
           </main>
         </div>
       </div>
+      <CommandPalette isAdmin={isAdmin} />
     </SidebarProvider>
   )
 }

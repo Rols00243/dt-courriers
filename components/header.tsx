@@ -2,7 +2,7 @@
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { InstallButton } from "@/components/install-button"
-import { Bell, Menu } from "lucide-react"
+import { Bell, Menu, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
@@ -38,6 +38,21 @@ export function Header() {
       </Button>
 
       <div className="flex-1" />
+
+      {/* Bouton recherche — simule le raccourci Ctrl+K */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          const ev = new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })
+          window.dispatchEvent(ev)
+        }}
+        className="gap-2 text-gray-500 hidden md:flex hover:text-gray-700 dark:hover:text-gray-300"
+      >
+        <Search className="h-3.5 w-3.5" />
+        <span className="text-xs">Rechercher</span>
+        <kbd className="text-[10px] font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">Ctrl K</kbd>
+      </Button>
 
       <InstallButton />
       <Link href="/dashboard/notifications">
